@@ -1,4 +1,4 @@
 #![allow(dead_code)]
-#![no_std]
+//#![no_std]
 
 pub mod fpr_masked;

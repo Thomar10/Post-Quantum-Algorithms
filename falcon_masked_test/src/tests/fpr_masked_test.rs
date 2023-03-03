@@ -175,14 +175,35 @@ mod tests {
 
     #[test]
     fn fpr_floor_test() {
-        for _ in 0..100 {
-            let mut shares_x = [0; 2];
-            let mut shares_y = [0; 2];
-            let (x, _) = create_masked(&mut shares_x, &mut shares_y);
-            let floor_res = fpr_floor(&shares_x);
-
-            assert_eq!(floor_res[0] + floor_res[1], floor(x));
-        }
+        let hmm: f64 = -0.50;
+        let hmm_fpr: fpr = f64::to_bits(hmm);
+        println!("{}", hmm_fpr);
+        let less: f64 = -0.4;
+        let less_fpr: fpr = f64::to_bits(less);
+        println!("{}", (hmm_fpr & less_fpr) < hmm_fpr);
+        let more: f64 = -77.65894025971227;
+        let more_fpr: fpr = f64::to_bits(more);
+        println!("{}", more_fpr);
+        println!("{}", (hmm_fpr & more_fpr) < hmm_fpr);
+        // for _ in 0..100 {
+        //     let mut shares_x = [0; 2];
+        //     let mut shares_y = [0; 2];
+        //     let (x, _) = create_masked(&mut shares_x, &mut shares_y);
+        //     println!("{}", fpr_to_double(shares_x[0]));
+        //     println!("{}", fpr_to_double(shares_x[1]));
+        //     let first = lt(shares_x[0], 0);
+        //     let second = lt(shares_x[1], 0);
+        //     println!("{}", first);
+        //     println!("{}", second);
+        //     if first == 1 && second == 1 {
+        //         let floor_res = fpr_floor(&shares_x);
+        //         println!("correct {}", fpr_to_double(x));
+        //         println!("correct {}", floor(x));
+        //         println!();
+        //         assert_eq!(floor_res[0] + floor_res[1], floor(x));
+        //     }
+        // }
+        assert_eq!(1, 0);
     }
 
     #[test]

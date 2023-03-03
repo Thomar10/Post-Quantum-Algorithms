@@ -1,7 +1,13 @@
 use core::ops::Sub;
+
+use rand::{Rng, thread_rng};
+
 use falcon::falcon::fpr;
 use falcon::fpr::{fpr_add as add, fpr_div as div, fpr_double as double, fpr_expm_p63 as expm_p63, fpr_floor as floor, fpr_half as half, fpr_inv as inv, fpr_lt as lt, fpr_mul as mul, fpr_neg as neg, fpr_of, fpr_rint as rint, fpr_sqrt as sqrt, fpr_sub as sub, fpr_trunc as trunc};
-use rand::{Rng, thread_rng};
+
+static A_HALF: fpr = 4602678819172646912;
+static A_HALF_NEG: fpr = 13826050856027422720;
+static SIGN_BIT: fpr = 1 << 63;
 
 pub fn fpr_add(x: &[fpr], y: &[fpr]) -> [fpr; 2] {
     let mut d = [0; 2];
@@ -66,11 +72,88 @@ pub fn fpr_rint(x: &[fpr]) -> [i64; 2] {
 #[inline(always)]
 pub fn fpr_floor(x: &[fpr]) -> [i64; 2] {
     let mut d = [0; 2];
-    d[0] = floor(x[0]);
-    d[1] = floor(x[1]);
+
+    println!("{}", fpr_to_double(x[0]));
+    println!("{}", fpr_to_double(x[1]));
+    // d[0] = floor(x[0]);
+    // d[1] = floor(x[1]);
+    // println!("d {}", floor(x[0]));
+    // println!("dr {}", rint(x[0]));
+    // println!("d1 {}", floor(x[1]));
+    // println!("d1r {}", rint(x[1]));
+    // println!("{}", d[0] + d[1]);
+    //First pos second neg
+    if !(x[0] & SIGN_BIT > 0) && (x[1] & SIGN_BIT > 0) {
+        println!("First pos second neg");
+        println!("d {}", floor(x[0]));
+        println!("dr {}", rint(x[0]));
+        println!("d1 {}", floor(x[1]));
+        println!("d1r {}", rint(x[1]));
+        println!();
+        d[0] = floor(x[0]);//if x[0] & A_HALF > A_HALF { rint(x[0]) } else { floor(x[0]) };
+        d[1] = rint(x[1]);//if x[1] & A_HALF_NEG > A_HALF_NEG { rint(x[1]) } else { floor(x[1]) };
+        println!("d0 {}", d[0]);
+        println!("d1 {}", d[1]);
+        println!("pn {}", d[0] + d[1]);
+    }
+    //First negative second pos
+    else if (x[0] & SIGN_BIT > 0) && !(x[1] & SIGN_BIT > 0) {
+        println!("First neg second pos");
+        d[0] = rint(x[0]);//if x[0] & A_HALF_NEG > A_HALF_NEG { floor(x[0]) } else { rint(x[0]) };
+        d[1] = floor(x[1]);//if x[1] & A_HALF > A_HALF { rint(x[1]) } else { floor(x[1]) };
+        println!("d0 {}", d[0]);
+        println!("d1 {}", d[1]);
+        println!("np {}", d[0] + d[1]);
+    }
+    // Both negative
+    else if (x[0] & SIGN_BIT > 0) && (x[1] & SIGN_BIT > 0) {
+        println!("negative both");
+        println!("d {}", floor(x[0]));
+        println!("dr {}", rint(x[0]));
+        println!("d1 {}", floor(x[1]));
+        println!("d1r {}", rint(x[1]));
+        println!();
+        if (!(x[0] & A_HALF_NEG < A_HALF_NEG)) && (!(x[1] & A_HALF_NEG < A_HALF_NEG)) {
+            println!("BG half");
+            d[0] = floor(x[0]);
+            d[1] = floor(x[1]);
+        } else if (!(x[0] & A_HALF_NEG < A_HALF_NEG)) && (x[1] & A_HALF_NEG < A_HALF_NEG) {
+            println!("FG half");
+            d[0] = floor(x[0]);
+            d[1] = rint(x[1]);
+        } else if (x[0] & A_HALF_NEG < A_HALF_NEG) && (!(x[1] & A_HALF_NEG < A_HALF_NEG)){
+            println!("SG half");
+            d[0] = rint(x[0]);
+            d[1] = floor(x[1]);
+        } else {
+            println!("NG half");
+            d[0] = floor(x[0]);
+            d[1] = floor(x[1]);
+        }
+        println!("d0 {}", d[0]);
+        println!("d1 {}", d[1]);
+        println!("neg {}", d[0] + d[1]);
+    }
+    // Both positive
+    else {
+        println!("positive both");
+        println!("d {}", floor(x[0]));
+        println!("dr {}", rint(x[0]));
+        println!("d1 {}", floor(x[1]));
+        println!("d1r {}", rint(x[1]));
+        println!();
+        d[0] = if x[0] & A_HALF > A_HALF { rint(x[0]) } else { floor(x[0]) };
+        d[1] = if x[1] & A_HALF > A_HALF { rint(x[1]) } else { floor(x[1]) };
+        println!("d0 {}", d[0]);
+        println!("d1 {}", d[1]);
+        println!("pos {}", d[0] + d[1]);
+    }
     d
 }
 
+pub fn fpr_to_double(x: fpr) -> f64 {
+    return f64::from_bits(x);
+}
 
 #[inline(always)]
 pub fn fpr_neg(x: &[fpr]) -> [fpr; 2] {
